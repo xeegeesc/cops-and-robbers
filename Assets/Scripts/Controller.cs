@@ -20,6 +20,7 @@ public class Controller : MonoBehaviour
     private int clickedTile = -1;
     private int clickedCop = 0;
     private int[,] matriz = new int[Constants.NumTiles, Constants.NumTiles];
+    private List<int> casillasPolis = new List<int>();
 
     void Start()
     {        
@@ -222,36 +223,75 @@ public class Controller : MonoBehaviour
 
     public void FindSelectableTiles(bool cop)
     {
-                 
-        int indexcurrentTile;        
 
-        if (cop==true)
-            indexcurrentTile = cops[clickedCop].GetComponent<CopMove>().currentTile;
+        int idexCurrent;
+        int otherCop = 99;
+
+        if (cop == true)
+        {
+            idexCurrent = cops[clickedCop].GetComponent<CopMove>().currentTile;
+        }
         else
-            indexcurrentTile = robber.GetComponent<RobberMove>().currentTile;
+        {
+            idexCurrent = robber.GetComponent<RobberMove>().currentTile;
+        }
+
+        casillasPolis.Add(cops[0].GetComponent<CopMove>().currentTile);
+        casillasPolis.Add(cops[1].GetComponent<CopMove>().currentTile);
+
 
         //La ponemos rosa porque acabamos de hacer un reset
-        tiles[indexcurrentTile].current = true;
+        tiles[idexCurrent].current = true;
 
         //Cola para el BFS
         Queue<Tile> nodes = new Queue<Tile>();
 
         //TODO: Implementar BFS. Los nodos seleccionables los ponemos como selectable=true
         //Tendrás que cambiar este código por el BFS
-        for(int i = 0; i < Constants.NumTiles; i++)
+
+        foreach (int i in tiles[idexCurrent].adjacency)
         {
             tiles[i].selectable = true;
+            if (tiles[i].numTile == casillasPolis[0] || tiles[i].numTile == casillasPolis[1])
+            {
+                otherCop = tiles[i].numTile;
+            }
+            foreach (int j in tiles[i].adjacency)
+            {
+                tiles[j].selectable = true;
+            }
         }
 
+        foreach (int tile in casillasPolis)
+        {
+            if (tiles[tile].selectable) tiles[tile].selectable = false;
+        }
 
+        if (otherCop != 99)
+        {
+            //Esta arriba
+            if (otherCop == idexCurrent + 8) tiles[otherCop + 8].selectable = false;
+
+            //Esta abajo
+            if (otherCop == idexCurrent - 8) tiles[otherCop - 8].selectable = false;
+
+            //Esta derecha
+            if (otherCop == idexCurrent + 1) tiles[otherCop + 1].selectable = false;
+
+            //Esta izquierda
+            if (otherCop == idexCurrent - 1) tiles[otherCop - 1].selectable = false;
+
+        }
+
+        casillasPolis.Clear();
     }
-    
-   
-    
 
-    
 
-   
 
-       
+
+
+
+
+
+
 }
